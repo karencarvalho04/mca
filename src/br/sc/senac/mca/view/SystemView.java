@@ -14,6 +14,8 @@ public class SystemView extends JFrame {
 
     JPanel pnlSystem = new JPanel();
     JMenuBar menuBar = new JMenuBar();
+ //   JScrollPane scrollPane = new JScrollPane(pnlSystem);
+
     //JButton btnPesquisa = new JButton("Pesquisar");
   //  JButton btnCliente = new JButton("Clientes");
 
@@ -24,8 +26,8 @@ public class SystemView extends JFrame {
     }
     public void initComponents(){
         setTitle("Tela de sistema");
-        setSize(1280,800);
-        setExtendedState(MAXIMIZED_BOTH);
+        setSize(1920,1080);
+        //setExtendedState(MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(pnlSystem);
         setVisible(true);
@@ -33,6 +35,9 @@ public class SystemView extends JFrame {
         setJMenuBar(menuBar);
      //   add(btnPesquisa);
       //  add(btnCliente);
+        //scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+       // scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+       // setContentPane(scrollPane);
 
     }
     public void initMenuBar(){
@@ -91,6 +96,7 @@ public class SystemView extends JFrame {
         btnCliente.setBounds(450,300,150,100);
       // btnCliente.setSize(100,100);
       // btnCliente.setLocation(640,400);
+
         pnlSystem.add(btnCliente);
 
         btnCliente.addActionListener(new ActionListener() {

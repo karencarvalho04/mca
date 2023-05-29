@@ -15,8 +15,6 @@ public class LoginView extends JFrame {
     private JPanel panel;
     private JLabel lblUsuario;
     private JLabel lblSenha;
-
-
     private JTextField txtLogin;
     private JPasswordField txtSenha;
     private JButton btnLimpar;
@@ -70,6 +68,7 @@ public class LoginView extends JFrame {
         });
     }
     public static void main(String[] args) {
+
         LoginView lv = new LoginView();
     }
 }

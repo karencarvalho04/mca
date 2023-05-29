@@ -10,7 +10,7 @@ public class ClienteController extends Dao<Cliente> {
     @Override
     public boolean cadastrar(Cliente cliente) throws SQLException {
         boolean resultado = false;
-
+        //criar classe ClienteDao no pacote dao
         ClienteDao clienteDao = new ClienteDao();
 
         if (clienteDao.cadastrar(cliente)){

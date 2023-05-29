@@ -1,10 +1,12 @@
 package br.sc.senac.mca.view;
 
 import br.sc.senac.mca.util.OperacoesCrud;
-
+import com.toedter.calendar.JDateChooser;
+import com.toedter.calendar.demo.DateChooserPanel;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
 
 public class ClientView extends JFrame{
     private JPanel pnlClientView;
@@ -27,6 +29,9 @@ public class ClientView extends JFrame{
     private JButton btnCancelar;
     private JTable table1;
     private JPanel pnlBotoesAcao;
+    private JPanel pnlDados;
+    private JPanel pnl;
+    private JPanel pnlTabela;
     public Integer operacao;
 
     public ClientView(){
@@ -35,7 +40,7 @@ public class ClientView extends JFrame{
     }
     public void initComponents(){
         setTitle("Cadastro de Clientes");
-        setSize(1290,900);
+        setSize(900,600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(pnlClientView);
         setVisible(true);
@@ -49,8 +54,8 @@ public class ClientView extends JFrame{
                 operacao = OperacoesCrud.NOVO.getOperacao();
 
                 btnEditar.setEnabled(false);
-                btnAtualizar.setVisible(false);
-                btnExcluir.setVisible(false);
+                btnAtualizar.setEnabled(true);
+                btnExcluir.setEnabled(false);
 
                 pnlBotoesAcao.setVisible(true);
 
@@ -61,7 +66,6 @@ public class ClientView extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 operacao = OperacoesCrud.EDITAR.getOperacao();
-
             }
         });
         btnSalvar.addActionListener(new ActionListener() {
@@ -79,9 +83,7 @@ public class ClientView extends JFrame{
     }
     private void gravarAtualizarDados() {
         if (operacao == OperacoesCrud.NOVO.getOperacao()){
-
         } else if (operacao == OperacoesCrud.EDITAR.getOperacao()){
-
         }
     }
     private void abrirCampos(){
