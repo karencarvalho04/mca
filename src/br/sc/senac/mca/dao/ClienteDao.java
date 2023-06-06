@@ -4,6 +4,7 @@ import br.sc.senac.mca.model.Cliente;
 import br.sc.senac.mca.util.ConnectionFactory;
 import br.sc.senac.mca.util.StandardException;
 
+import javax.swing.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

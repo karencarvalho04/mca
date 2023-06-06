@@ -1,5 +1,7 @@
 package br.sc.senac.mca.view;
 
+import br.sc.senac.mca.controller.ClienteController;
+import br.sc.senac.mca.model.Cliente;
 import br.sc.senac.mca.util.OperacoesCrud;
 import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.demo.DateChooserPanel;
@@ -7,6 +9,9 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientView extends JFrame{
     private JPanel pnlClientView;
@@ -33,6 +38,7 @@ public class ClientView extends JFrame{
     private JPanel pnl;
     private JPanel pnlTabela;
     public Integer operacao;
+    private String sexo;
 
     public ClientView(){
         initComponents();
@@ -60,6 +66,7 @@ public class ClientView extends JFrame{
                 pnlBotoesAcao.setVisible(true);
 
                 abrirCampos();
+                LimparCampos();
             }
         });
         btnEditar.addActionListener(new ActionListener() {
@@ -80,10 +87,48 @@ public class ClientView extends JFrame{
                 gravarAtualizarDados();
             }
         });
+
+       rbFeminino.addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               rbMasculino.setSelected(false);
+               sexo = rbFeminino.getText();
+           }
+       });
+        rbMasculino.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rbFeminino.setSelected(false);
+                sexo = rbMasculino.getText();
+            }
+        });
     }
     private void gravarAtualizarDados() {
-        if (operacao == OperacoesCrud.NOVO.getOperacao()){
-        } else if (operacao == OperacoesCrud.EDITAR.getOperacao()){
+
+        //recupera dados da tela
+        String nome = txtNome.getText();
+        String cpf = txtCpf.getText();
+        String fone = txtTelefone.getText();
+
+        //atribui dados da tela para o objeto cliente
+        Cliente cliente = new Cliente();
+        cliente.setNome(nome);
+        cliente.setCpf(cpf);
+        cliente.setFone(fone);
+        cliente.setSexo(formatarCampoSexo(sexo));
+
+        ClienteController clienteController = new ClienteController();
+
+        try{
+            if (operacao == OperacoesCrud.NOVO.getOperacao()){
+                clienteController.cadastrar(cliente);
+                JOptionPane.showMessageDialog(null, "O cliente " +
+                        cliente.getNome()+ " foi criado com sucesso!");
+                        LimparCampos();
+            } else if (operacao == OperacoesCrud.EDITAR.getOperacao()){
+            }
+        } catch (SQLException ex){
+            Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     private void abrirCampos(){
@@ -91,6 +136,20 @@ public class ClientView extends JFrame{
         txtCpf.setEditable(true);
         txtEndereco.setEditable(true);
         txtTelefone.setEditable(true);
+    }
+    private String formatarCampoSexo(String sexo){
+        if (sexo.equals("Masculino")){
+            sexo = "M";
+        } else {
+            sexo = "F";
+        }
+        return sexo;
+    }
+    private void LimparCampos(){
+        txtNome.setText(" ");
+        txtCpf.setText(" ");
+        txtEndereco.setText(" ");
+        txtTelefone.setText(" ");
     }
     public static void main(String[] args) {
         ClientView clientView = new ClientView();
