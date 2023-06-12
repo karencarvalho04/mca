@@ -2,13 +2,18 @@ package br.sc.senac.mca.view;
 
 import br.sc.senac.mca.controller.ClienteController;
 import br.sc.senac.mca.model.Cliente;
+import br.sc.senac.mca.util.ConnectionFactory;
 import br.sc.senac.mca.util.OperacoesCrud;
-import com.toedter.calendar.JDateChooser;
-import com.toedter.calendar.demo.DateChooserPanel;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,17 +37,20 @@ public class ClientView extends JFrame{
     private JButton btnSalvar;
     private JButton btnAtualizar;
     private JButton btnCancelar;
-    private JTable table1;
+    private JTable tblCliente;
     private JPanel pnlBotoesAcao;
     private JPanel pnlDados;
     private JPanel pnl;
-    private JPanel pnlTabela;
+    private JScrollPane pnlTabela;
     public Integer operacao;
     private String sexo;
+    private Integer codigo;
+    private String nomeCliente;
 
     public ClientView(){
         initComponents();
         listeners();
+        CarregarDadosTabela();
     }
     public void initComponents(){
         setTitle("Cadastro de Clientes");
@@ -51,9 +59,10 @@ public class ClientView extends JFrame{
         setContentPane(pnlClientView);
         setVisible(true);
 
+
         pnlBotoesAcao.setVisible(false);
     }
-    public void listeners(){
+    public void listeners() {
         btnNovo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,13 +97,13 @@ public class ClientView extends JFrame{
             }
         });
 
-       rbFeminino.addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-               rbMasculino.setSelected(false);
-               sexo = rbFeminino.getText();
-           }
-       });
+        rbFeminino.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                rbMasculino.setSelected(false);
+                sexo = rbFeminino.getText();
+            }
+        });
         rbMasculino.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -103,6 +112,13 @@ public class ClientView extends JFrame{
             }
         });
     }
+
+   /* private void tblClienteMouseClicked(){
+        ListSelectionModel tableSelectionModel = tblCliente.getSelectionModel();
+        tblCliente.setSelectionMode(tableSelectionModel);
+        setCodigo(tblCliente.getValueAt(tblCliente.getSelectedRow(),0).toString());
+        setNomeCliente();
+    }*/
     private void gravarAtualizarDados() {
 
         //recupera dados da tela
@@ -131,6 +147,7 @@ public class ClientView extends JFrame{
             Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     private void abrirCampos(){
         txtNome.setEditable(true);
         txtCpf.setEditable(true);
@@ -151,6 +168,58 @@ public class ClientView extends JFrame{
         txtEndereco.setText(" ");
         txtTelefone.setText(" ");
     }
+
+    private void CarregarDadosTabela() {
+        String sql = "select cli_cod, cli_nome, cli_cpf, cli_sexo, cli_fone  from cliente order by cli_cod;";
+
+        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[] {"Código", "Nome", "CPF", "Sexo", "Fone"});
+        tblCliente.setModel(model);
+
+        try {
+            Connection connection = ConnectionFactory.getConexao();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            tblCliente.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            tblCliente.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblCliente.getColumnModel().getColumn(1).setPreferredWidth(180);
+            tblCliente.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblCliente.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tblCliente.getColumnModel().getColumn(4).setPreferredWidth(100);
+
+
+            while (rs.next()) {
+                Integer rsCodigo = rs.getInt("cli_cod");
+                String rsNome = rs.getString("cli_nome");
+                String rsCpf = rs.getString("cli_cpf");
+                String rsSexo = rs.getString("cli_sexo");
+                if (rs.equals("M")) {
+                    rsSexo = "Masculino";
+                } else {
+                    rsSexo = "Feminino";
+                }
+                String rsFone = rs.getString("cli_fone");
+                model.addRow(new Object[]{rsCodigo, rsNome, rsCpf, rsSexo, rsFone});
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+        public Integer getCodigo() {
+            return codigo;
+        }
+        public void setCodigo(Integer codigo) {
+            this.codigo = codigo;
+        }
+        public String getNomeCliente() {
+            return nomeCliente;
+        }
+
+        public void setNomeCliente(String nomeCliente) {
+            this.nomeCliente = nomeCliente;
+        }
+
     public static void main(String[] args) {
         ClientView clientView = new ClientView();
     }
