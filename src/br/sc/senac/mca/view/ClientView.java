@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,13 +46,18 @@ public class ClientView extends JFrame{
     private JScrollPane pnlTabela;
     public Integer operacao;
     private String sexo;
+
+    //variáveis em tempo de execução
     private Integer codigo;
     private String nomeCliente;
+
+
 
     public ClientView(){
         initComponents();
         listeners();
         CarregarDadosTabela();
+
     }
     public void initComponents(){
         setTitle("Cadastro de Clientes");
@@ -71,29 +78,48 @@ public class ClientView extends JFrame{
                 btnEditar.setEnabled(false);
                 btnAtualizar.setEnabled(true);
                 btnExcluir.setEnabled(false);
-
+                btnNovo.setEnabled(false);
                 pnlBotoesAcao.setVisible(true);
 
                 abrirCampos();
                 LimparCampos();
             }
         });
+
+        btnCancelar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnNovo.setEnabled(true);
+                btnAtualizar.setEnabled(true);
+                btnExcluir.setEnabled(true);
+                btnEditar.setEnabled(true);
+
+                fecharCampos();
+            }
+        });
+
         btnEditar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 operacao = OperacoesCrud.EDITAR.getOperacao();
+
             }
         });
         btnSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 gravarAtualizarDados();
+                CarregarDadosTabela();
             }
         });
         btnAtualizar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                gravarAtualizarDados();
+
+                CarregarDadosTabela();
+
             }
         });
 
@@ -111,14 +137,46 @@ public class ClientView extends JFrame{
                 sexo = rbMasculino.getText();
             }
         });
+        tblCliente.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+
+                //recupera as informações na tabela
+                ListSelectionModel tableSelectionModel = tblCliente.getSelectionModel();
+
+                //refresh - limpeza de cache da tabela
+                tblCliente.setSelectionModel(tableSelectionModel);
+
+
+                //armazenar a linha selecionada nas variáveis instância para utilizar nas operações de atualização e exclusão
+                setCodigo(Integer.parseInt(tblCliente.getValueAt(tblCliente.getSelectedRow(), 0).toString()));
+                setNomeCliente(tblCliente.getValueAt(tblCliente.getSelectedRow(), 1).toString());
+
+                String rowCpf = tblCliente.getValueAt(tblCliente.getSelectedRow(), 2).toString();
+                String rowSexo = tblCliente.getValueAt(tblCliente.getSelectedRow(), 3).toString();
+                String rowFone = tblCliente.getValueAt(tblCliente.getSelectedRow(), 4).toString();
+
+                txtNome.setText(getNomeCliente());
+                txtCpf.setText(rowCpf);
+                getSexoSelecionado(rowSexo);
+                txtTelefone.setText(rowFone);
+
+        }
+        });
     }
 
-   /* private void tblClienteMouseClicked(){
-        ListSelectionModel tableSelectionModel = tblCliente.getSelectionModel();
-        tblCliente.setSelectionMode(tableSelectionModel);
-        setCodigo(tblCliente.getValueAt(tblCliente.getSelectedRow(),0).toString());
-        setNomeCliente();
-    }*/
+
+    private void getSexoSelecionado(String rowSexo) {
+        if(rowSexo.equals("Masculino")){
+            rbMasculino.setSelected(true);
+            rbFeminino.setSelected(false);
+        } else {
+            rbMasculino.setSelected(false);
+            rbFeminino.setSelected(true);
+        }
+    }
+
     private void gravarAtualizarDados() {
 
         //recupera dados da tela
@@ -147,12 +205,25 @@ public class ClientView extends JFrame{
             Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    private void fecharCampos(){
+        txtNome.setEnabled(false);
+        txtCpf.setEnabled(false);
+        txtEndereco.setEnabled(false);
+        txtTelefone.setEnabled(false);
+        rbFeminino.setEnabled(false);
+        rbMasculino.setEnabled(false);
+    }
     private void abrirCampos(){
         txtNome.setEditable(true);
+        txtNome.setEnabled(true);
         txtCpf.setEditable(true);
+        txtCpf.setEnabled(true);
         txtEndereco.setEditable(true);
+        txtEndereco.setEnabled(true);
         txtTelefone.setEditable(true);
+        txtTelefone.setEnabled(true);
+        rbFeminino.setEnabled(true);
+        rbMasculino.setEnabled(true);
     }
     private String formatarCampoSexo(String sexo){
         if (sexo.equals("Masculino")){
@@ -168,7 +239,6 @@ public class ClientView extends JFrame{
         txtEndereco.setText(" ");
         txtTelefone.setText(" ");
     }
-
     private void CarregarDadosTabela() {
         String sql = "select cli_cod, cli_nome, cli_cpf, cli_sexo, cli_fone  from cliente order by cli_cod;";
 
@@ -187,21 +257,21 @@ public class ClientView extends JFrame{
             tblCliente.getColumnModel().getColumn(3).setPreferredWidth(100);
             tblCliente.getColumnModel().getColumn(4).setPreferredWidth(100);
 
-
-            while (rs.next()) {
+            while(rs.next()){
                 Integer rsCodigo = rs.getInt("cli_cod");
                 String rsNome = rs.getString("cli_nome");
                 String rsCpf = rs.getString("cli_cpf");
                 String rsSexo = rs.getString("cli_sexo");
-                if (rs.equals("M")) {
+                if(rsSexo.equals("M") || rsSexo.equals("m")){
                     rsSexo = "Masculino";
-                } else {
+                }else{
                     rsSexo = "Feminino";
                 }
                 String rsFone = rs.getString("cli_fone");
-                model.addRow(new Object[]{rsCodigo, rsNome, rsCpf, rsSexo, rsFone});
+                model.addRow(new Object[]{rsCodigo, rsNome, rsCpf, rsSexo, rsFone });
             }
-            ps.executeUpdate();
+
+            // ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
