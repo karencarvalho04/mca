@@ -20,13 +20,27 @@ public class ClienteController extends Dao<Cliente> {
     }
 
     @Override
-    public boolean atualizar(Cliente pojo) throws SQLException {
-        return false;
+    public boolean atualizar(Cliente cliente) throws SQLException {
+        boolean resultado = false;
+        //criar classe ClienteDao no pacote dao
+        ClienteDao clienteDao = new ClienteDao();
+
+        if (clienteDao.atualizar(cliente)){
+            resultado = true;
+        }
+        return resultado;
     }
 
     @Override
-    public boolean excluir(Cliente pojo) throws SQLException {
-        return false;
+    public boolean excluir(Cliente cliente) throws SQLException {
+        boolean resultado = false;
+        //criar classe ClienteDao no pacote dao
+        ClienteDao clienteDao = new ClienteDao();
+
+        if (clienteDao.excluir(cliente)){
+            resultado = true;
+        }
+        return resultado;
     }
 
     @Override

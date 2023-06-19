@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +51,7 @@ public class ClientView extends JFrame{
     //variáveis em tempo de execução
     private Integer codigo;
     private String nomeCliente;
+    DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[] {"Código", "Nome", "CPF", "Sexo", "Fone"});
 
 
 
@@ -104,22 +106,62 @@ public class ClientView extends JFrame{
 
                 operacao = OperacoesCrud.EDITAR.getOperacao();
 
+                if (tblCliente.getSelectedRow() == -1){
+                    if (tblCliente.getRowCount() == 0) {
+                        JOptionPane.showMessageDialog(null, "A tabela está vazia");
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "Deve ser selecionado um cliente");
+                    }
+                } else {
+                    btnExcluir.setEnabled(false);
+                    btnNovo.setEnabled(false);
+                    pnlBotoesAcao.setVisible(true);
+                    btnSalvar.setEnabled(false);
+                    btnAtualizar.setEnabled(true);
+
+                    abrirCampos();
+                }
+
             }
         });
         btnSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 gravarAtualizarDados();
                 CarregarDadosTabela();
+            }
+        });
+        btnExcluir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                operacao = OperacoesCrud.EXCLUIR.getOperacao();
+
+                if (tblCliente.getSelectedRow() == -1){
+                    if (tblCliente.getRowCount() == 0) {
+                        JOptionPane.showMessageDialog(null, "A tabela está vazia");
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "Deve ser selecionado um cliente");
+                    }
+                } else {
+                    btnExcluir.setEnabled(false);
+                    btnNovo.setEnabled(true);
+                    pnlBotoesAcao.setVisible(true);
+                    btnSalvar.setEnabled(false);
+                    btnAtualizar.setEnabled(true);
+                    excluirDados();
+                    abrirCampos();
+                }
+
             }
         });
         btnAtualizar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                gravarAtualizarDados();
                 CarregarDadosTabela();
-
             }
         });
 
@@ -148,10 +190,10 @@ public class ClientView extends JFrame{
                 //refresh - limpeza de cache da tabela
                 tblCliente.setSelectionModel(tableSelectionModel);
 
-
                 //armazenar a linha selecionada nas variáveis instância para utilizar nas operações de atualização e exclusão
                 setCodigo(Integer.parseInt(tblCliente.getValueAt(tblCliente.getSelectedRow(), 0).toString()));
                 setNomeCliente(tblCliente.getValueAt(tblCliente.getSelectedRow(), 1).toString());
+
 
                 String rowCpf = tblCliente.getValueAt(tblCliente.getSelectedRow(), 2).toString();
                 String rowSexo = tblCliente.getValueAt(tblCliente.getSelectedRow(), 3).toString();
@@ -161,12 +203,9 @@ public class ClientView extends JFrame{
                 txtCpf.setText(rowCpf);
                 getSexoSelecionado(rowSexo);
                 txtTelefone.setText(rowFone);
-
         }
         });
     }
-
-
     private void getSexoSelecionado(String rowSexo) {
         if(rowSexo.equals("Masculino")){
             rbMasculino.setSelected(true);
@@ -176,7 +215,6 @@ public class ClientView extends JFrame{
             rbFeminino.setSelected(true);
         }
     }
-
     private void gravarAtualizarDados() {
 
         //recupera dados da tela
@@ -196,13 +234,47 @@ public class ClientView extends JFrame{
         try{
             if (operacao == OperacoesCrud.NOVO.getOperacao()){
                 clienteController.cadastrar(cliente);
+                model.addRow(new Object[]{clienteController.getCodigo(cliente), nome, cpf, sexo, fone});
+
                 JOptionPane.showMessageDialog(null, "O cliente " +
                         cliente.getNome()+ " foi criado com sucesso!");
                         LimparCampos();
             } else if (operacao == OperacoesCrud.EDITAR.getOperacao()){
+                cliente.setCodigo(getCodigo());
+                clienteController.atualizar(cliente);
+                model.setValueAt(nome, tblCliente.getSelectedRow(), 1);
+                model.setValueAt(cpf, tblCliente.getSelectedRow(), 2);
+                model.setValueAt(sexo, tblCliente.getSelectedRow(), 3);
+                model.setValueAt(fone, tblCliente.getSelectedRow(), 4);
+
+                JOptionPane.showMessageDialog(null, "O cliente " +
+                        cliente.getNome()+ " foi atualizado com sucesso!");
+
             }
         } catch (SQLException ex){
             Logger.getLogger(ClientView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void excluirDados() {
+        String msg = "Deletar o cliente " + getNomeCliente() + "?";
+        int opcaoEscolhida = JOptionPane.showConfirmDialog(null, msg, "Exclusão", JOptionPane.YES_NO_OPTION);
+        if (opcaoEscolhida == JOptionPane.YES_OPTION) {
+            Cliente cliente = new Cliente();
+            cliente.setCodigo(getCodigo());
+
+            try {
+                ClienteController clienteController = new ClienteController();
+                clienteController.excluir(cliente);
+                model.removeRow(tblCliente.getSelectedRow());
+
+                JOptionPane.showMessageDialog(null, "O cliente " + getCodigo() + getNomeCliente() +
+                        " foi excluído com sucesso! ", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     private void fecharCampos(){
@@ -226,7 +298,7 @@ public class ClientView extends JFrame{
         rbMasculino.setEnabled(true);
     }
     private String formatarCampoSexo(String sexo){
-        if (sexo.equals("Masculino")){
+        if (Objects.equals(sexo, "Masculino")){
             sexo = "M";
         } else {
             sexo = "F";
@@ -242,7 +314,7 @@ public class ClientView extends JFrame{
     private void CarregarDadosTabela() {
         String sql = "select cli_cod, cli_nome, cli_cpf, cli_sexo, cli_fone  from cliente order by cli_cod;";
 
-        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[] {"Código", "Nome", "CPF", "Sexo", "Fone"});
+       // DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[] {"Código", "Nome", "CPF", "Sexo", "Fone"});
         tblCliente.setModel(model);
 
         try {
