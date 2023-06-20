@@ -26,7 +26,7 @@ public class SystemView extends JFrame {
     }
     public void initComponents(){
         setTitle("Tela de sistema");
-        setSize(1920,1080);
+        setSize(900,600);
         //setExtendedState(MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(pnlSystem);

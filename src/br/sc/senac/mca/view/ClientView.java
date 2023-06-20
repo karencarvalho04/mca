@@ -54,7 +54,6 @@ public class ClientView extends JFrame{
     DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[] {"Código", "Nome", "CPF", "Sexo", "Fone"});
 
 
-
     public ClientView(){
         initComponents();
         listeners();
@@ -67,9 +66,8 @@ public class ClientView extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(pnlClientView);
         setVisible(true);
-
-
         pnlBotoesAcao.setVisible(false);
+
     }
     public void listeners() {
         btnNovo.addActionListener(new ActionListener() {
@@ -146,12 +144,15 @@ public class ClientView extends JFrame{
                                 "Deve ser selecionado um cliente");
                     }
                 } else {
-                    btnExcluir.setEnabled(false);
-                    btnNovo.setEnabled(true);
+                    btnNovo.setEnabled(false);
                     pnlBotoesAcao.setVisible(true);
                     btnSalvar.setEnabled(false);
-                    btnAtualizar.setEnabled(true);
+                    btnAtualizar.setEnabled(false);
+                    btnCancelar.setEnabled(true);
+
                     excluirDados();
+
+                    LimparCampos();
                     abrirCampos();
                 }
 
@@ -257,7 +258,7 @@ public class ClientView extends JFrame{
     }
 
     private void excluirDados() {
-        String msg = "Deletar o cliente " + getNomeCliente() + "?";
+        String msg = "Deletar o cliente: " + getNomeCliente() + "?";
         int opcaoEscolhida = JOptionPane.showConfirmDialog(null, msg, "Exclusão", JOptionPane.YES_NO_OPTION);
         if (opcaoEscolhida == JOptionPane.YES_OPTION) {
             Cliente cliente = new Cliente();
@@ -268,7 +269,7 @@ public class ClientView extends JFrame{
                 clienteController.excluir(cliente);
                 model.removeRow(tblCliente.getSelectedRow());
 
-                JOptionPane.showMessageDialog(null, "O cliente " + getCodigo() + getNomeCliente() +
+                JOptionPane.showMessageDialog(null, "O cliente " + getCodigo() + " " + getNomeCliente() +
                         " foi excluído com sucesso! ", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
             } catch (SQLException e) {
                 e.printStackTrace();
